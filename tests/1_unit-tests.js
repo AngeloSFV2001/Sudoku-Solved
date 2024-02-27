@@ -3,80 +3,95 @@ const assert = chai.assert;
 
 const Solver = require('../controllers/sudoku-solver.js');
 let solver = new Solver();
+const testPuzzles = require('../controllers/puzzle-strings.js').puzzlesAndSolutions;
 
 suite('UnitTests', () => {
-  //  [
-  //     '1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.',
-  //     '135762984946381257728459613694517832812936745357824196473298561581673429269145378'
-  //   ]
-  test('Logic handles a valid puzzle string of 81 characters', done => {
-    // console.log(solver.solve('1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.'))
-    const solution = '135762984946381257728459613694517832812936745357824196473298561581673429269145378'
-    assert.equal(solver.solve(chunkSubstr('1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.', 9)), solution);
-    done();
+  suite('checkRowPlacement tests', function () {
+    test('true tests', function () {
+      assert.isTrue(solver.checkRowPlacement(testPuzzles[0][0], "D", 4, 8), "Upper case row index failed");
+      assert.isTrue(solver.checkRowPlacement(testPuzzles[0][0], "f", 9, 4), "Lower case row index failed");
+    });
+    test('false tests', function () {
+      assert.isFalse(solver.checkRowPlacement(testPuzzles[0][0], "D", 2, 1));
+    });
   });
-  test('Logic handles a puzzle string with invalid characters (not 1-9 or .)', done => {
-    assert.equal(solver.solve(chunkSubstr('AA5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.', 9)).error, 'Invalid characters in puzzle');
-    done();
+  suite('checkColPlacement tests', function () {
+    test('true tests', function () {
+      assert.isTrue(solver.checkColPlacement(testPuzzles[1][0], "G", 3, 1));
+      assert.isTrue(solver.checkColPlacement(testPuzzles[1][0], "E", 6, 2));
+    });
+    test('false tests', function () {
+      assert.isFalse(solver.checkColPlacement(testPuzzles[1][0], "b", 4, 7));
+      assert.isFalse(solver.checkColPlacement(testPuzzles[1][0], "C", 6, 1));
+    });
   });
-  test('Logic handles a puzzle string that is not 81 characters in length', done => {
-    //  console.log('5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.'.length);//79
-    assert.equal(solver.solve(chunkSubstr('5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.', 9)).error, "Expected puzzle to be 81 characters long");
-    done();
+  suite('checkRegionPlacement tests', function () {
+    test('true tests', function () {
+      assert.isTrue(solver.checkRegionPlacement(testPuzzles[2][0], "C", 6, 2));
+      assert.isTrue(solver.checkRegionPlacement(testPuzzles[2][0], "i", 8, 9));
+    });
+    test('false tests', function () {
+      assert.isFalse(solver.checkRegionPlacement(testPuzzles[2][0], "c", 9, 6));
+      assert.isFalse(solver.checkRegionPlacement(testPuzzles[2][0], "g", 6, 3));
+    });
   });
-  test('Logic handles a valid row placement', done => {
-    assert.equal(solver.checkRowPlacement(chunkSubstr('..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..', 9), 'A', '1', '8'), true);
-    done();
-  })
-  test('Logic handles an invalid row placement', done => {
-    assert.equal(solver.checkRowPlacement(chunkSubstr('..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..', 9), 'A', '1', '9'), false);
-    done();
-  })
-  test('Logic handles a valid column placement', done => {
-    assert.equal(solver.checkColPlacement(chunkSubstr('..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..', 9), 'A', '1', '3'), true);
-    done();
-  })
-  test('Logic handles an invalid column placement', done => {
-    assert.equal(solver.checkColPlacement(chunkSubstr('..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..', 9), 'A', '1', '8'), false);
-    done();
-  })
-  test('Logic handles a valid region (3x3 grid) placement', done => {
-    assert.equal(solver.checkRegionPlacement(chunkSubstr('..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..', 9), 'A', '1', '7'), true);
-    done();
-  })
-  test('Logic handles an invalid region (3x3 grid) placement', done => {
-    assert.equal(solver.checkRegionPlacement(chunkSubstr('..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..', 9), 'A', '1', '8'), false);
-    done();
-  })
-  test('Valid puzzle strings pass the solver', done => {
-    const solution = '135762984946381257728459613694517832812936745357824196473298561581673429269145378'
-    assert.equal(solver.solve(chunkSubstr('1.5..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.', 9)), solution);
-    done();
+  suite('findAllCellOptions tests', function () {
+    test("Finds inputs that don't violate sudoku rules", function () {
+      assert.deepEqual(solver.findAllCellOptions(testPuzzles[3][0], "A", 1), ['3','4'])
+    })
   });
-
-  test("Invalid puzzle strings fail the solver", (done) => {
-    let inValidPuzzle =
-      "115..2.84..63.12.7.2..5.....9..1....8.2.3674.3.7.2..9.47...8..1..16....926914.37.";
-    assert.equal(solver.solve(chunkSubstr(inValidPuzzle, 9)).error, 'Puzzle cannot be solved');
-    done();
+  suite('checkDuplicateValue tests', function () {
+    test('true tests', function () {
+      assert.isTrue(solver.checkDuplicateValue(testPuzzles[3][0], "g", 6, 2))
+    })
+    test('false tests', function () {
+      assert.isFalse(solver.checkDuplicateValue(testPuzzles[3][0], "g", 6, 4))
+      assert.isFalse(solver.checkDuplicateValue(testPuzzles[3][0], "f", 6, 4))
+    })
   });
-  test("Solver returns the the expected solution for an incomplete puzzzle", function(done) {
-    assert.equal(
-      solver.solve(
-        chunkSubstr("..839.7.575.....964..1.......16.29846.9.312.7..754.....62..5.78.8...3.2...492...1",9)
-      ),
-      "218396745753284196496157832531672984649831257827549613962415378185763429374928561"
-    );
-    done();
+  suite('valadate tests', function () {
+    test('passing test', function () {
+      assert.isTrue(solver.validate([...testPuzzles[3][0]]))
+    })
+    test('failing test', function () {
+      assert.isFalse(solver.validate([...testPuzzles[5][0]]))
+    })
   });
 
+  suite('solve tests', function () {
+    test('solution 0 tests', function () {
+      let test = [...testPuzzles[0][0]]
+      assert.isTrue(solver.solve(test))
+      assert.equal(test.join(""), testPuzzles[0][1])
+    })
 
-  function chunkSubstr(str, size) {
-    const numChunks = Math.ceil(str.length / size)
-    const chunks = new Array(numChunks)
-    for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
-      chunks[i] = str.substr(o, size)
-    }
-    return chunks
-  }
+    test('solution 1 tests', function () {
+      let test = [...testPuzzles[1][0]]
+      assert.isTrue(solver.solve(test))
+      assert.equal(test.join(""), testPuzzles[1][1])
+    })
+
+    test('solution 2 tests', function () {
+      let test = [...testPuzzles[2][0]]
+      assert.isTrue(solver.solve(test))
+      assert.equal(test.join(""), testPuzzles[2][1])
+    })
+
+    test('solution 3 tests', function () {
+      let test = [...testPuzzles[3][0]]
+      assert.isTrue(solver.solve(test))
+      assert.equal(test.join(""), testPuzzles[3][1])
+    })
+
+    test('solution 4 tests', function () {
+      let test = [...testPuzzles[4][0]]
+      assert.isTrue(solver.solve(test))
+      assert.equal(test.join(""), testPuzzles[4][1])
+    })
+
+    test('no solution tests', function () {
+      let test = [...testPuzzles[5][0]]
+      assert.isFalse(solver.solve(test))
+    })
+  });
 });
