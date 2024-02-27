@@ -58,8 +58,9 @@ module.exports = function (app) {
       });
     });
 
+  let error;
   app.get('/_api/get-tests', cors(), function(req, res, next){
-    console.log('requested');
+    console.log(error);
     if(process.env.NODE_ENV === 'test') return next();
     res.json({status: 'unavailable'});
   },
